@@ -7,6 +7,9 @@ authors = ["Your Name <you@example.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 PyAutoGUI = "^0.9.53"
+Pillow = "^9.1.0"
+pytesseract = "^0.3.9"
+opencv-python = "^4.5.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
