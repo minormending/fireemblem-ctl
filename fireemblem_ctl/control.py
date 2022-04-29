@@ -68,26 +68,11 @@ class VBA:
         image: Image = self.screenshot(left, top, width, height, image_name)
         print(pytesseract.image_to_string(image).strip())
 
-        image_arr = np.array(image)
-        #image = image.convert("L") # grayscale
-        cv2.imwrite("gray0-" + image_name, image_arr)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite("gray1-" + image_name, image)
-        print(pytesseract.image_to_string(image).strip())
-        #thresh = cv2.threshold(image,105, 255, cv2.THRESH_BINARY_INV)[1]
-        #cv2.imwrite("gray2-" + image_name, image)
-        #print(pytesseract.image_to_string(thresh).strip())
-        #thresh = 255 - thresh
-
-        #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-        #result = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
-
-        result = cv2.threshold(image, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY_INV)[1]
-
-        #image = cv2.bitwise_not(image)
-        #image = cv2.Canny(image, threshold1=400, threshold2=410)
-        cv2.imwrite("gray-" + image_name, result)
-        return pytesseract.image_to_string(result).strip()
+        image = image.convert('RGB')
+        image_arr = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR) # convert PIL image to openCV
+        image_arr = cv2.bitwise_not(image_arr) # change text from white to black
+        image_arr = cv2.cvtColor(image_arr, cv2.COLOR_BGR2GRAY) # grayscale
+        return pytesseract.image_to_string(image_arr).strip()
 
     def screenshot_window(self, image_name: str = None) -> Image:
         window: Window = self._find_window()
@@ -112,6 +97,14 @@ class VBA:
         
     def ctl_down(self, delay: float = 1.0) -> None:
         pydirectinput.press("s")
+        sleep(delay)
+        
+    def ctl_left(self, delay: float = 1.0) -> None:
+        pydirectinput.press("a")
+        sleep(delay)
+        
+    def ctl_right(self, delay: float = 1.0) -> None:
+        pydirectinput.press("d")
         sleep(delay)
 
     def ctl_a(self, delay: float = 1.0) -> None:
@@ -152,59 +145,39 @@ class FireEmblem:
                 restart_option = option
         
         if restart_idx is None:
-            logging.warn("At chapter menu and do not understand the options.")
+            logging.warning("At chapter menu and do not understand the options.")
             exit(1)
 
         logging.debug(f"Going to select option ({restart_idx}) {restart_option}")
         cursor_down = restart_idx + 1 # we are on last option, so + 1
         list([self.vba.ctl_down() for i in range(cursor_down)])
 
-        self.vba.ctl_a() # Click restart chapter
+        self.vba.ctl_a() # Click "Restart Chapter"
 
-        chapter_tite: str = self.vba.get_text(70 * self.vba.scale, 80 * self.vba.scale, 360 * self.vba.scale, 40 * self.vba.scale, "chapter_name.png")
+        chapter_tite: str = self.vba.get_text(70 * self.vba.scale, 85 * self.vba.scale, 360 * self.vba.scale, 40 * self.vba.scale, "chapter_name.png")
         logging.info(f"Detected chapter: {chapter_tite}")
 
-        self.vba.send_keys("z") # start chapter
+        self.vba.ctl_a() # start chapter
 
+        chapter_suspend: str = self.vba.get_text(110 * self.vba.scale, 115 * self.vba.scale, 270 * self.vba.scale, 85 * self.vba.scale, "chapter_suspend.png")
+        chapter_suspend = chapter_suspend.replace("\n", " ").strip().lower()
+        if "suspended data will be lost" in chapter_suspend:
+            logging.debug(f"Suspended chapter data already exists, choosing to delete previous data. msg: {chapter_suspend}")
+            self.vba.ctl_left() # move cursor to "Start"
+            self.vba.ctl_a() # select "Start"
 
+        sleep(5) # wait for chapter intro animation
         return chapter_tite
 
 
 logging.basicConfig(level=logging.DEBUG)
 
+"""
 image_name = "box.png"
 image = cv2.imread("box.png")
 print("unedited:", pytesseract.image_to_string(image).strip())
-
-#print(image.shape)
-#image = image[:,:,0]
-#cv2.imwrite("gray0-" + image_name, image)
-#print("blue:", pytesseract.image_to_string(image).strip())
-
-image = cv2.bitwise_not(image)
-cv2.imwrite("inverted-" + image_name, image)
-print("inverted:", pytesseract.image_to_string(image).strip())
-
-
-image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-cv2.imwrite("gray-" + image_name, image)
-print("grayscale:", pytesseract.image_to_string(image).strip())
-
-
-#cv2.imwrite("gray1-" + image_name, image)
-#print(pytesseract.image_to_string(image).strip())
-#thresh = cv2.threshold(image,105, 255, cv2.THRESH_BINARY_INV)[1]
-#cv2.imwrite("gray2-" + image_name, image)
-#print(pytesseract.image_to_string(thresh).strip())
-#thresh = 255 - thresh
-
-#kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-#result = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
-
-image = cv2.threshold(image, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY_INV)[1]
-print("stuff:", pytesseract.image_to_string(image).strip())
-
 exit(0)
+"""
 
 with VBA("tools\VisualBoyAdvance.exe", "tools\Fire Emblem (U).gba") as vba:
     vba.disable_layers()
