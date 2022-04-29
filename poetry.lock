@@ -221,6 +221,14 @@ python3-Xlib = {version = "*", markers = "platform_system == \"Linux\" and pytho
 PyTweening = ">=1.0.1"
 
 [[package]]
+name = "pydirectinput"
+version = "1.0.4"
+description = "Python mouse and keyboard input automation for Windows using Direct Input."
+category = "main"
+optional = false
+python-versions = ">=3.4"
+
+[[package]]
 name = "pygetwindow"
 version = "0.0.9"
 description = "A simple, cross-platform module for obtaining GUI information on application's windows."
@@ -2223,7 +2231,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "93037174ab37475e38207810ff5528da68ea4388c00ddca52c930a9f2e883159"
+content-hash = "87ec9c6c2b9d924baa9496ddfae370103e190b6a342af5b535e5b32481fc854b"
 
 [metadata.files]
 atomicwrites = [
@@ -2418,6 +2426,10 @@ py = [
 ]
 pyautogui = [
     {file = "PyAutoGUI-0.9.53.tar.gz", hash = "sha256:d31de8f712218d90be7fc98091fce1a12a3e9196e0c814eb9afd73bb2ec97035"},
+]
+pydirectinput = [
+    {file = "PyDirectInput-1.0.4-py3-none-any.whl", hash = "sha256:238bbe97f505f9c8728a47ea6a787750dbe834ec1fb42b98b3d703d827eda83e"},
+    {file = "PyDirectInput-1.0.4.tar.gz", hash = "sha256:bebe65102c69208688402f9f4cbd2ae7afc174fd2123e156e178b1304e7f80a2"},
 ]
 pygetwindow = [
     {file = "PyGetWindow-0.0.9.tar.gz", hash = "sha256:17894355e7d2b305cd832d717708384017c1698a90ce24f6f7fbf0242dd0a688"},
